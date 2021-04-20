@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>子页面</title>
+    <style>
+      #main {
+        border: 1px solid red;
+        min-width: 600px;
+        min-height: 400px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <p class="parent-tip"></p>
+      <p class="resevied"></p>
+    </div>
+    <div class="main">
+      <input type="text" /><button class="btn1">点击我发送</button>
+    </div>
+    <div class="bottom">
+      <button class="btn2">我要token</button>
+    </div>
+    <script>
+      window.onload = function () {
+        var sendMessage = null
+        var tip = document.querySelector('p.parent-tip')
+        var win = window
+        var parent = window.parent && window.parent.window
+        function cb(data) {
+          document.querySelector('p.resevied').textContent = data
+          // window.location.search = data
+          // sendMessage && sendMessage('this.refresh++')
+        }
+        if (parent !== win) {
+          console.log((tip.textContent = '有父级存在'))
+          sendMessage = (function () {
+            if (win.postMessage) {
+              if (win.addEventListener) {
+                win.addEventListener('message', (e) => {
+                  cb.call(this, e.data)
+                })
+              } else if (win.attachEvent) {
+                win.attachEvent('onmessage', (e) => {
+                  cb.call(this, e.data)
+                })
+              }
+              return function (data) {
+                parent.postMessage(data, '*')
+              }
+            } else {
+              let hash = ''
+              this._interval_ && clearInterval(this.interval)
+              this._interval_ = setInterval(() => {
+                if (win.name !== hash) {
+                  hash = win.name
+                  cb.call(this, hash)
+                }
+              }, 200)
+              return function (data) {
+                parent.name = data
+              }
+            }
+          })()
+        } else {
+          console.log((tip.textContent = '没有父级'))
+        }
+        var btn1 = document.querySelector('button.btn1')
+        var btn2 = document.querySelector('button.btn2')
+
+        var inp = document.querySelector('input')
+        btn1.addEventListener('click', function () {
+          const val = inp.value
+          sendMessage && sendMessage(val)
+        })
+        btn2.addEventListener('click', function () {
+          sendMessage && sendMessage('this.sendMessage(this.freshToken())')
+        })
+      }
+    </script>
+  </body>
+</html>
